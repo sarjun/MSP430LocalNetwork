@@ -1,0 +1,26 @@
+ULTIBOARD DRILL REPORT
+
+Design: RS485HeaderBoard_1
+
+DRILL FILE SETTINGS
+Excellon 2, Absolute, Inch, 2.5 
+
+
+DEFINITION COPPER LAYERS
+Copper Top
+Copper Bottom
+
+
+--------------------------------------------------------------------
+
+DRILLFILE                                           LAMINATION
+RS485HeaderBoard_1 - Copper Top-Copper Bottom.drl   Copper Top .. Copper Bottom
+
+TOOL     SIZE   TYPE  COUNT
+   1  0.06300    PTH      9
+   2  0.04000    PTH     39
+   3  0.04000   NPTH      1
+   4  0.03937    PTH     12
+   5  0.02362    PTH     27
+   6  0.03333    PTH      1
+   7  0.03500    PTH      1
