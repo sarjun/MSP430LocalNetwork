@@ -15,6 +15,10 @@
 #define INIT_COMM_0 1
 #define INIT_COMM_1 0
 
+void doRead();
+void doWrite();
+void handleRead();
+
 int id = 1;
 int write_1[] = {INIT_COMM_0, INIT_COMM_1, 0, 1};
 int write_2[] = {INIT_COMM_0, INIT_COMM_1, 1, 0};
@@ -51,8 +55,6 @@ int main(void) {
     		P1OUT |= WRITE_EN;
     	}
     }
-
-	return 0;
 }
 
 #pragma vector=TIMER0_A0_VECTOR
@@ -66,6 +68,7 @@ int initRead1 = 0;
 int initRead2 = 0;
 int valSet = 0;
 int valRead = 0;
+
 void doRead() {
 	if(initRead1 && initRead2) {
 		if(P2IN & READ) {

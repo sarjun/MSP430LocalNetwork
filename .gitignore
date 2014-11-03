@@ -1,2 +1,21 @@
+## General
+
 *(Security Copy)
 *.zip
+
+
+
+## For Multisim/Ultiboard Files
+
+
+
+## For CCS project files
+
+# Anything in the Debug folder
+Source/CapstoneLocalComm/Debug/
+
+# Anything in the Launches folder
+Source/CapstoneLocalComm/.launches
+
+# cproject file that's different for each user
+Source/CapstoneLocalComm/.cproject
