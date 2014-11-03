@@ -15,7 +15,7 @@
 Source/CapstoneLocalComm/Debug/
 
 # Anything in the Launches folder
-Source/CapstoneLocalComm/.launches
+Source/CapstoneLocalComm/.launches/
 
 # cproject file that's different for each user
 Source/CapstoneLocalComm/.cproject
