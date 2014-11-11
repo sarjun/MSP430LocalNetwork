@@ -21,18 +21,18 @@
 
 //Constant define section:
 #define BITS_IN_TRANSMISSION  32
-#define TRANSMIT_PIN          B8_5(P1OUT)
-#define TRANSMIT_PORT         P1
-#define TRANSMIT_PORT_DIR     P1DIR
-#define TRANSMIT_BIT          5
+#define TRANSMIT_PIN          B8_3(P2OUT)
+#define TRANSMIT_PORT         P2
+#define TRANSMIT_PORT_DIR     P2DIR
+#define TRANSMIT_BIT          3
 
-#define TX_RCV_MODE			  B8_6(P1OUT)
+#define TX_RCV_MODE			  B8_4(P1OUT)
 #define TX_RCV_PORT_DIR       P1DIR
-#define TX_RCV_BIT            6
+#define TX_RCV_BIT            4
 
 //Establish bits and registers for receiver pins
-#define RCV_CAPTURE_BIT0      0
-#define RCV_CAPTURE_BIT1      1
+#define RCV_CAPTURE_BIT0      2
+#define RCV_CAPTURE_BIT1      4
 #define RCV_PORT_SEL          P2SEL
 #define RCV_PORT_SEL2         P2SEL2
 
@@ -505,7 +505,7 @@ void InitHardware(void) {
 //Set up ports here :
 	P1OUT = 0 ;
 	P2OUT = 0 ;   //Establish Safe Values for start up.
-	TX_RCV_MODE = HIGH ;  //Asuume starting out to receive.
+	TX_RCV_MODE = LOW ;  //Asuume starting out to receive.
 	TX_RCV_PORT_DIR |= 1<<TX_RCV_BIT ;
 	TRANSMIT_PIN = LOW ;
 	TRANSMIT_PORT_DIR |= 1<<TRANSMIT_BIT ;  //Enable output pin for xmitter
