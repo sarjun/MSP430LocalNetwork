@@ -205,6 +205,7 @@ void InitVariables(void){
 //This routine manages the actual transmitter and is called every 500uS by a periodic interrupt.
 //Comment Well
 void Xmit(TransmitterData* TData) {
+	TX_RCV_MODE = HIGH ;
 	enum XmitClockPhase Phase;
 	unsigned long  Test_MSBit ; //This is used as a boolean to test the XOR of the MS Bit of the Xmitted Word.
 //Each 500 uS half bit period constitutes a separate clock "phase" for transmitter purposes.
@@ -292,6 +293,7 @@ void Xmit(TransmitterData* TData) {
 		break ;
 
 	}
+	TX_RCV_MODE = LOW ;
 }
 
 //This should be called Frequently from the main loop.
