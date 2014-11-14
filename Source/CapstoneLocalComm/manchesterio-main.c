@@ -548,10 +548,11 @@ void ReinitXmitter(void) {
 
 // Interrupt Handlers Start Here
 
+int send = 0;
 #pragma vector=TIMER0_A0_VECTOR
 __interrupt void periodicTimerA0Interrupt(void){
 	/* Capture Compare Register 0 ISR Hook Function Name */
-//	ihandler();
+	if(send) ihandler();
 	_nop();
 	/* No change in operating mode on exit */
 }
@@ -559,7 +560,7 @@ __interrupt void periodicTimerA0Interrupt(void){
 #pragma vector = PORT2_VECTOR
 __interrupt void Button_routine (void) {
 	// Handle the button
-	ihandler();
+	send = 1 - send;
 	P2IFG &= ~BIT0;
 }
 
