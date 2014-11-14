@@ -560,6 +560,7 @@ __interrupt void periodicTimerA0Interrupt(void){
 #pragma vector = PORT2_VECTOR
 __interrupt void Button_routine (void) {
 	// Handle the button
+	if(send) ReinitXmitter(); // Do we need this
 	send = 1 - send;
 	P2IFG &= ~BIT0;
 }
