@@ -1,7 +1,7 @@
 /*
  * main.c
  */
-// #define DEBUG_XMITTER
+//#define DEBUG_XMITTER
 //#define DEBUG_RCVR
 //#define DEBUGGING
 //Include Section:
@@ -522,6 +522,13 @@ void InitHardware(void) {
 //
 // End of port setup/
 	BCSplus_initial()   ; //get clock going - 8 mhz rate
+
+    P2IE |= BIT0;
+    P2REN |= BIT0;
+    P2OUT |= BIT0;
+	P2IFG &= ~BIT0;
+
+
 #ifndef DEBUG_RCVR
 	Timer0_A3_initial() ;
 	Timer1_A3_initial() ;
@@ -544,8 +551,16 @@ void ReinitXmitter(void) {
 #pragma vector=TIMER0_A0_VECTOR
 __interrupt void periodicTimerA0Interrupt(void){
 	/* Capture Compare Register 0 ISR Hook Function Name */
-	ihandler();
+//	ihandler();
+	_nop();
 	/* No change in operating mode on exit */
+}
+
+#pragma vector = PORT2_VECTOR
+__interrupt void Button_routine (void) {
+	// Handle the button
+	ihandler();
+	P2IFG &= ~BIT0;
 }
 
 
