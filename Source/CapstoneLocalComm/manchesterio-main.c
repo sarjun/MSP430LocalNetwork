@@ -166,6 +166,10 @@ void main(void) {
 #endif
 
 		rcv() ; //Call the receiver
+		_nop();
+		if(!Rcv1.BitsLeftToGet && Rcv1.LastValidReceived) {
+			_nop();
+		}
 #ifdef DEBUG_XMITTER
 		debugging() ;
 #endif
@@ -312,6 +316,7 @@ void rcv(void){
 		Rcv1.CurrentRcvState = Initial_Expect_Rising ;
 	}
 	index = GetEvent() ;
+	_nop();
 	if (index != -1 ) { //Here we have an edge to deal with, -1 indicates no event in queue
 		Current_Event.Edge = Receiver_Events.Events[(unsigned int)index].Edge ;
 		Current_Event.TimeStamp = Receiver_Events.Events[(unsigned int)index].TimeStamp ;
@@ -572,7 +577,8 @@ __interrupt void Button_routine (void) {
 #pragma vector=TIMER1_A0_VECTOR
 __interrupt void timerCaptureRisingInterrupt(void){
 	/* Capture Compare Register 0 ISR Hook Function Name */
-	risingedge();
+//	risingedge();
+	_nop();
 	/* No change in operating mode on exit */
 }
 
@@ -589,6 +595,7 @@ __interrupt void timerCaptureFallingInterrupt(void){
             /* No change in operating mode on exit */
             break;
         case TA1IV_TACCR2:
+        	risingedge();
             break;
         case TA1IV_TAIFG:
             break;
@@ -699,7 +706,7 @@ void Timer1_A3_initial(void)
 	     *
 	     * Note: ~SCCI indicates that SCCI has value zero
 	     */
-	    TA1CCTL0 = CM_1 + CCIS_0 + SCS + CAP + OUTMOD_0 + CCIE;
+	    TA1CCTL2 = CM_1 + CCIS_0 + SCS + CAP + OUTMOD_0 + CCIE;
 
 	    /*
 	     * TA1CCTL1, Capture/Compare Control Register 1
