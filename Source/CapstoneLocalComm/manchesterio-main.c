@@ -166,6 +166,10 @@ void main(void) {
 #endif
 
 		rcv() ; //Call the receiver
+		_nop();
+		if(!Rcv1.BitsLeftToGet && Rcv1.LastValidReceived) {
+			_nop();
+		}
 #ifdef DEBUG_XMITTER
 		debugging() ;
 #endif
@@ -312,6 +316,7 @@ void rcv(void){
 		Rcv1.CurrentRcvState = Initial_Expect_Rising ;
 	}
 	index = GetEvent() ;
+	_nop();
 	if (index != -1 ) { //Here we have an edge to deal with, -1 indicates no event in queue
 		Current_Event.Edge = Receiver_Events.Events[(unsigned int)index].Edge ;
 		Current_Event.TimeStamp = Receiver_Events.Events[(unsigned int)index].TimeStamp ;
