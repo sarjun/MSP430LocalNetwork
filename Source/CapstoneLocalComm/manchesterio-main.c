@@ -572,8 +572,7 @@ __interrupt void Button_routine (void) {
 #pragma vector=TIMER1_A0_VECTOR
 __interrupt void timerCaptureRisingInterrupt(void){
 	/* Capture Compare Register 0 ISR Hook Function Name */
-	risingedge();
-	/* No change in operating mode on exit */
+	_nop() ;
 }
 
 /*
@@ -589,6 +588,8 @@ __interrupt void timerCaptureFallingInterrupt(void){
             /* No change in operating mode on exit */
             break;
         case TA1IV_TACCR2:
+        	risingedge();
+        	/* No change in operating mode on exit */
             break;
         case TA1IV_TAIFG:
             break;
@@ -699,7 +700,7 @@ void Timer1_A3_initial(void)
 	     *
 	     * Note: ~SCCI indicates that SCCI has value zero
 	     */
-	    TA1CCTL0 = CM_1 + CCIS_0 + SCS + CAP + OUTMOD_0 + CCIE;
+	    TA1CCTL2 = CM_1 + CCIS_0 + SCS + CAP + OUTMOD_0 + CCIE;
 
 	    /*
 	     * TA1CCTL1, Capture/Compare Control Register 1
@@ -713,7 +714,7 @@ void Timer1_A3_initial(void)
 	     *
 	     * Note: ~SCCI indicates that SCCI has value zero
 	     */
-	    TA1CCTL1 = CM_2 + CCIS_0 + SCS + CAP + OUTMOD_0 + CCIE;
+	    TA1CCTL1 = CM_2 + CCIS_1 + SCS + CAP + OUTMOD_0 + CCIE;
 
 	    /*
 	     * TA1CCTL2, Capture/Compare Control Register 2
