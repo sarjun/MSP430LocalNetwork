@@ -212,11 +212,6 @@ void Xmit(TransmitterData* TData) {
 	TX_RCV_MODE = HIGH ;
 	enum XmitClockPhase Phase;
 	unsigned long  Test_MSBit ; //This is used as a boolean to test the XOR of the MS Bit of the Xmitted Word.
-//Each 500 uS half bit period constitutes a separate clock "phase" for transmitter purposes.
-	if (TData->Transmit_Clock_Phase == Low){
-		TData->Transmit_Clock_Phase = High ;
-	}
-	else TData->Transmit_Clock_Phase = Low ;
 	Phase = TData->Transmit_Clock_Phase ;
 	Test_MSBit = TData->Transmit_Data & 0x80000000 ; // We will use this as an "XOR" test in the transmitter phases.
 //Now do state machine
@@ -490,7 +485,7 @@ void ihandler(void) {
 
 //This called by the capture routine on the rising edge of the input signal
 void risingedge(void) {
-	InsertEvent(Rising, TA1CCR0) ;	//Insert this event into event Queue
+	InsertEvent(Rising, TA1CCR2) ;	//Insert this event into event Queue
 }
 
 void fallingedge(void){
@@ -557,6 +552,11 @@ int send = 0;
 #pragma vector=TIMER0_A0_VECTOR
 __interrupt void periodicTimerA0Interrupt(void){
 	/* Capture Compare Register 0 ISR Hook Function Name */
+	//Each 500 uS half bit period constitutes a separate clock "phase" for transmitter purposes.
+	if (Xmit1.Transmit_Clock_Phase == Low){
+		Xmit1.Transmit_Clock_Phase = High ;
+	}
+	else Xmit1.Transmit_Clock_Phase = Low ;
 	if(send) ihandler();
 	_nop();
 	/* No change in operating mode on exit */
