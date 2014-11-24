@@ -209,7 +209,6 @@ void InitVariables(void){
 //This routine manages the actual transmitter and is called every 500uS by a periodic interrupt.
 //Comment Well
 void Xmit(TransmitterData* TData) {
-	TX_RCV_MODE = HIGH ;
 	enum XmitClockPhase Phase;
 	unsigned long  Test_MSBit ; //This is used as a boolean to test the XOR of the MS Bit of the Xmitted Word.
 	Phase = TData->Transmit_Clock_Phase ;
@@ -217,6 +216,7 @@ void Xmit(TransmitterData* TData) {
 //Now do state machine
 	switch(TData->Transmitter_State){
 		case StartBit : //This sends the equivalent of a 1-0 preamble to start the receiver in the right state.
+			TX_RCV_MODE = HIGH ;
 			DEBUG_LED = LED_ON ;
 			switch(Phase) {
 				case Low :
@@ -271,6 +271,7 @@ void Xmit(TransmitterData* TData) {
 
 		break ;
 		case InterWord :
+			TX_RCV_MODE = LOW ;
 			DEBUG_LED = LED_OFF ;
 			switch(Phase) {
 				case Low :
@@ -292,7 +293,6 @@ void Xmit(TransmitterData* TData) {
 		break ;
 
 	}
-	TX_RCV_MODE = LOW ;
 }
 
 //This should be called Frequently from the main loop.
