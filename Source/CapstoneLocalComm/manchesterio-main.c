@@ -694,7 +694,7 @@ void Timer0_A3_initial(void)
 void Timer1_A3_initial(void)
 {
 	/*
-	     * TA1CCTL0, Capture/Compare Control Register 0
+	     * TA1CCTL2, Capture/Compare Control Register 2
 	     *
 	     * CM_1 -- Rising Edge
 	     * CCIS_0 -- CCIxA
