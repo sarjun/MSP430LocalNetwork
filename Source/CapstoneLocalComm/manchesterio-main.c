@@ -143,6 +143,8 @@ void debugging(void) ; //Just some dummy code to exercise the xmitter.
 int idSeen = 0;
 int idSet = 0;
 int myID = 0;
+int dest = 1;
+int payload = 1;
 void main(void) {
 //Be sure to stop watchdog timer first!
 
@@ -171,11 +173,9 @@ void main(void) {
 				}
 			}
 		}
-		if(idSet) {
-			_nop();
-		}
 	}
 
+	canRead = 0;
 	while (1) { //Main code loop here :
 
 #ifdef DEBUG_RCVR
@@ -188,7 +188,15 @@ void main(void) {
 		}
 #endif
 
-		rcv() ; //Call the receiver
+		if(Rcv1.BitsLeftToGet) canRead = 1;
+		if(canRead) {
+			if(!Rcv1.BitsLeftToGet && Rcv1.LastValidReceived) {
+				canRead = 0;
+				if(myID == ((Rcv1.LastValidReceived >> 8) & 0xFF)) {
+					int flashCount = Rcv1.LastValidReceived >> 16;
+				}
+			}
+		}
 #ifdef DEBUG_XMITTER
 		debugging() ;
 #endif
@@ -505,6 +513,11 @@ void ihandler(void) {
 		idSet = 1;
 		myID = idSeen + 1;
 	}
+	else {
+		Xmit1.Transmit_Data_Buffer = myID + (dest << 8) + (payload << 16);
+		dest = 1;
+		payload = 1;
+	}
 	Xmit(&(Xmit1)) ;
 }
 
@@ -532,7 +545,7 @@ void InitHardware(void) {
 //Set up ports here :
 	P1OUT = 0 ;
 	P2OUT = 0 ;   //Establish Safe Values for start up.
-	TX_RCV_MODE = LOW ;  //Asuume starting out to receive.
+	TX_RCV_MODE = LOW ;  //Assume starting out to receive.
 	TX_RCV_PORT_DIR |= 1<<TX_RCV_BIT ;
 	TRANSMIT_PIN = LOW ;
 	TRANSMIT_PORT_DIR |= 1<<TRANSMIT_BIT ;  //Enable output pin for xmitter
@@ -548,10 +561,15 @@ void InitHardware(void) {
 // End of port setup/
 	BCSplus_initial()   ; //get clock going - 8 mhz rate
 
-    P2IE |= BIT0;
-    P2REN |= BIT0;
-    P2OUT |= BIT0;
-	P2IFG &= ~BIT0;
+    P2IE |= BIT0 + BIT1;
+    P2REN |= BIT0 + BIT1;
+    P2OUT |= BIT0 + BIT1;
+	P2IFG &= ~(BIT0 + BIT1);
+
+	P1IE |= BIT3;
+	P1REN |= BIT3;
+	P1OUT |= BIT3;
+	P1IFG &= ~BIT3;
 
 
 #ifndef DEBUG_RCVR
@@ -591,9 +609,22 @@ __interrupt void periodicTimerA0Interrupt(void){
 #pragma vector = PORT2_VECTOR
 __interrupt void Button_routine (void) {
 	// Handle the button
-	if(send) ReinitXmitter(); // Do we need this
-	send = 1 - send;
-	P2IFG &= ~BIT0;
+	if(P2IFG & BIT0) {
+		if(send) ReinitXmitter(); // Do we need this
+		send = 1 - send;
+		P2IFG &= ~BIT0;
+	}
+	else {
+		dest++;
+		P2IFG &= ~BIT1;
+	}
+}
+
+#pragma vector = PORT1_VECTOR
+__interrupt void Other_Button_routine (void) {
+	// Handle the button
+	payload++;
+	P1IFG &= ~BIT3;
 }
 
 
