@@ -156,14 +156,19 @@ void main(void) {
 	_EINT() ;
 #endif
 
+	int canRead = 0;
 	while(1) {
 		rcv() ; //Call the receiver
-		if(!Rcv1.BitsLeftToGet && Rcv1.LastValidReceived) {
-			if(Rcv1.LastValidReceived >> 24 == idSeen + 1) {
-				idSeen++;
-			}
-			else { // ID setting stage is over; Someone that already had an id hit the button
-				break;
+		if(Rcv1.BitsLeftToGet) canRead = 1;
+		if(canRead) {
+			if(!Rcv1.BitsLeftToGet && Rcv1.LastValidReceived) {
+				canRead = 0;
+				if(Rcv1.LastValidReceived == idSeen + 1) {
+					idSeen++;
+				}
+				else { // ID setting stage is over; Someone that already had an id hit the button
+					break;
+				}
 			}
 		}
 		if(idSet) {
