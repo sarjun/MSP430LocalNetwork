@@ -140,9 +140,6 @@ unsigned int DummyTAR   ;
 #endif
 
 void debugging(void) ; //Just some dummy code to exercise the xmitter.
-int idSeen = -1;
-int idSet = 0;
-int myID = 0;
 void main(void) {
 //Be sure to stop watchdog timer first!
 
@@ -155,18 +152,6 @@ void main(void) {
 #ifndef DEBUGGING
 	_EINT() ;
 #endif
-
-	while(1) {
-		rcv() ; //Call the receiver
-		if(!Rcv1.BitsLeftToGet) {
-			if(Rcv1.LastValidReceived >> 24 == idSeen + 1) {
-				idSeen++;
-			}
-			else { // ID setting stage is over; Someone that already had an id hit the button
-				break;
-			}
-		}
-	}
 
 	while (1) { //Main code loop here :
 
@@ -195,7 +180,8 @@ void ReinitXmitter(void) ;
 void InitVariables(void){
 //Here is an example:
 //	Xmit1.Bits_Remaining = BITS_IN_TRANSMISSION ;
-	Xmit1.Transmit_Data_Buffer = 0 ;
+	Xmit1.Transmit_Data_Buffer = 0 ;  // Initial ID for id setting
+//	Xmit1.Transmit_Data = 0xAA55AA55        ; //This is just sample data, the final application Determines what is to be sent.
 //	Xmit1.Transmit_Clock_Phase = Low ;
 //"Real Initialization starts here
 	ReinitXmitter() ;
@@ -226,7 +212,6 @@ void Xmit(TransmitterData* TData) {
 //Now do state machine
 	switch(TData->Transmitter_State){
 		case StartBit : //This sends the equivalent of a 1-0 preamble to start the receiver in the right state.
-			TX_RCV_MODE = HIGH ;
 			DEBUG_LED = LED_ON ;
 			switch(Phase) {
 				case Low :
@@ -281,7 +266,6 @@ void Xmit(TransmitterData* TData) {
 
 		break ;
 		case InterWord :
-			TX_RCV_MODE = LOW ;
 			DEBUG_LED = LED_OFF ;
 			switch(Phase) {
 				case Low :
@@ -490,11 +474,6 @@ PulseWidthStatus TestWidth(unsigned int CurrentPulse){
 //This is called every 500uS by the timer A0 interrupt function
 void ihandler(void) {
 //Do whatever needs to be done on a periodic basis here:
-	if(!idSet) {
-		Xmit1.Transmit_Data_Buffer = idSeen + 1;
-		idSet = 1;
-		myID = idSeen + 1;
-	}
 	Xmit(&(Xmit1)) ;
 }
 
@@ -572,10 +551,7 @@ __interrupt void periodicTimerA0Interrupt(void){
 		Xmit1.Transmit_Clock_Phase = High ;
 	}
 	else Xmit1.Transmit_Clock_Phase = Low ;
-	if(send) {
-		send = 0;
-		ihandler();
-	}
+	if(send) ihandler();
 	_nop();
 	/* No change in operating mode on exit */
 }
@@ -583,8 +559,9 @@ __interrupt void periodicTimerA0Interrupt(void){
 #pragma vector = PORT2_VECTOR
 __interrupt void Button_routine (void) {
 	// Handle the button
-	if(send) ReinitXmitter(); // Do we need this
+	if(send) ReinitXmitter();
 	send = 1 - send;
+	TX_RCV_MODE = send == 1 ? HIGH : LOW;
 	P2IFG &= ~BIT0;
 }
 
