@@ -145,6 +145,8 @@ int idSet = 0;
 int myID = 0;
 int dest = 1;
 int payload = 1;
+int doneIDPhase = 0;
+int breakIDPhase = 0;
 void main(void) {
 //Be sure to stop watchdog timer first!
 
@@ -159,7 +161,7 @@ void main(void) {
 #endif
 
 	int canRead = 0;
-	while(1) {
+	while(!breakIDPhase) {
 		rcv() ; //Call the receiver
 		if(Rcv1.BitsLeftToGet) canRead = 1;
 		if(canRead) {
@@ -176,6 +178,7 @@ void main(void) {
 	}
 
 	canRead = 0;
+	doneIDPhase = 1;
 	while (1) { //Main code loop here :
 
 #ifdef DEBUG_RCVR
@@ -187,7 +190,7 @@ void main(void) {
 			_nop() ;
 		}
 #endif
-
+		_nop();
 		if(Rcv1.BitsLeftToGet) canRead = 1;
 		if(canRead) {
 			if(!Rcv1.BitsLeftToGet && Rcv1.LastValidReceived) {
@@ -306,6 +309,10 @@ void Xmit(TransmitterData* TData) {
 					if (--TData->InterwordTimeout == 0){
 						ReinitXmitter() ;
 						send = 0;
+						if(idSet) {
+							breakIDPhase = 1;
+						}
+						idSet = 1;
 					}
 
 				break ;
@@ -510,10 +517,9 @@ void ihandler(void) {
 //Do whatever needs to be done on a periodic basis here:
 	if(!idSet) {
 		Xmit1.Transmit_Data_Buffer = idSeen + 1;
-		idSet = 1;
 		myID = idSeen + 1;
 	}
-	else {
+	if(doneIDPhase) {
 		Xmit1.Transmit_Data_Buffer = myID + (dest << 8) + (payload << 16);
 		dest = 1;
 		payload = 1;
