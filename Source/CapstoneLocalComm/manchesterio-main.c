@@ -140,7 +140,7 @@ unsigned int DummyTAR   ;
 #endif
 
 void debugging(void) ; //Just some dummy code to exercise the xmitter.
-int idSeen = -1;
+int idSeen = 0;
 int idSet = 0;
 int myID = 0;
 void main(void) {
@@ -158,13 +158,16 @@ void main(void) {
 
 	while(1) {
 		rcv() ; //Call the receiver
-		if(!Rcv1.BitsLeftToGet) {
+		if(!Rcv1.BitsLeftToGet && Rcv1.LastValidReceived) {
 			if(Rcv1.LastValidReceived >> 24 == idSeen + 1) {
 				idSeen++;
 			}
 			else { // ID setting stage is over; Someone that already had an id hit the button
 				break;
 			}
+		}
+		if(idSet) {
+			_nop();
 		}
 	}
 
@@ -216,6 +219,7 @@ void InitVariables(void){
 
 }
 
+int send = 0;
 //This routine manages the actual transmitter and is called every 500uS by a periodic interrupt.
 //Comment Well
 void Xmit(TransmitterData* TData) {
@@ -288,6 +292,7 @@ void Xmit(TransmitterData* TData) {
 					TRANSMIT_PIN = LOW ;
 					if (--TData->InterwordTimeout == 0){
 						ReinitXmitter() ;
+						send = 0;
 					}
 
 				break ;
@@ -563,7 +568,6 @@ void ReinitXmitter(void) {
 
 // Interrupt Handlers Start Here
 
-int send = 0;
 #pragma vector=TIMER0_A0_VECTOR
 __interrupt void periodicTimerA0Interrupt(void){
 	/* Capture Compare Register 0 ISR Hook Function Name */
@@ -573,7 +577,6 @@ __interrupt void periodicTimerA0Interrupt(void){
 	}
 	else Xmit1.Transmit_Clock_Phase = Low ;
 	if(send) {
-		send = 0;
 		ihandler();
 	}
 	_nop();
