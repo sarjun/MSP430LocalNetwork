@@ -191,7 +191,9 @@ void main(void) {
 		}
 #endif
 		_nop();
-		if(Rcv1.BitsLeftToGet) canRead = 1;
+		if(Rcv1.BitsLeftToGet) {
+			canRead = 1;
+		}
 		if(canRead) {
 			if(!Rcv1.BitsLeftToGet && Rcv1.LastValidReceived) {
 				canRead = 0;
@@ -513,9 +515,11 @@ PulseWidthStatus TestWidth(unsigned int CurrentPulse){
 
 //Functions called via an  interrupt
 //This is called every 500uS by the timer A0 interrupt function
+int idSetStarted = 0;
 void ihandler(void) {
 //Do whatever needs to be done on a periodic basis here:
-	if(!idSet) {
+	if(!idSet && !idSetStarted) {
+		idSetStarted = 1;
 		idSeen++;
 		Xmit1.Transmit_Data_Buffer = idSeen;
 		myID = idSeen;
