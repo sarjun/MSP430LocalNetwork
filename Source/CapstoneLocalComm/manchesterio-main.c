@@ -216,6 +216,7 @@ void Xmit(TransmitterData* TData) {
 //Now do state machine
 	switch(TData->Transmitter_State){
 		case StartBit : //This sends the equivalent of a 1-0 preamble to start the receiver in the right state.
+			TX_RCV_MODE = HIGH ;
 			DEBUG_LED = LED_ON ;
 			switch(Phase) {
 				case Low :
@@ -270,6 +271,7 @@ void Xmit(TransmitterData* TData) {
 
 		break ;
 		case InterWord :
+			TX_RCV_MODE = LOW ;
 			DEBUG_LED = LED_OFF ;
 			switch(Phase) {
 				case Low :
@@ -563,9 +565,8 @@ __interrupt void periodicTimerA0Interrupt(void){
 #pragma vector = PORT2_VECTOR
 __interrupt void Button_routine (void) {
 	// Handle the button
-	if(send) ReinitXmitter();
+	if(send) ReinitXmitter(); // Do we need this
 	send = 1 - send;
-	TX_RCV_MODE = send == 1 ? HIGH : LOW;
 	P2IFG &= ~BIT0;
 }
 
