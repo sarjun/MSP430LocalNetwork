@@ -516,8 +516,9 @@ PulseWidthStatus TestWidth(unsigned int CurrentPulse){
 void ihandler(void) {
 //Do whatever needs to be done on a periodic basis here:
 	if(!idSet) {
-		Xmit1.Transmit_Data_Buffer = idSeen + 1;
-		myID = idSeen + 1;
+		idSeen++;
+		Xmit1.Transmit_Data_Buffer = idSeen;
+		myID = idSeen;
 	}
 	if(doneIDPhase) {
 		Xmit1.Transmit_Data_Buffer = myID + (dest << 8) + (payload << 16);
