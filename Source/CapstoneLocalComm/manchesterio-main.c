@@ -149,6 +149,8 @@ int doneIDPhase = 0;	// Flag showing that we are done with the ID phase.
 int breakIDPhase = 0;	// Flag signaling that we should break out of the ID setting phase.
 int setBufferFlag = 0;	// Flag showing whether we should set the data buffer based on the payload and dest,
 						// should only be done once before sending, even though sending is a multi-step process.
+int LEDFlashCounter = 0;	// Number of times the LED should flash, used when receiving messages.
+
 void main(void) {
 //Be sure to stop watchdog timer first!
 
@@ -203,7 +205,7 @@ void main(void) {
 				canRead = 0;
 				_nop();	// Gets the wrong ID in here a lot because of button bouncing issues.
 				if(myID == ((Rcv1.LastValidReceived >> 8) & 0xFF)) {
-					int flashCount = Rcv1.LastValidReceived >> 16;
+					LEDFlashCounter = Rcv1.LastValidReceived >> 16;
 					_nop();	// Rarely gets to here when it should.
 				}
 			}
@@ -657,6 +659,14 @@ __interrupt void Other_Button_routine (void) {
 #pragma vector=TIMER1_A0_VECTOR
 __interrupt void timerCaptureRisingInterrupt(void){
 	/* Capture Compare Register 0 ISR Hook Function Name */
+
+	// TODO: Configure this timer properly so it actually interrupts.
+	if (LEDFlashCounter > 0 && DEBUG_LED == LED_OFF) {
+		DEBUG_LED = LED_ON;
+	} else if (LEDFlashCounter > 0) {
+		DEBUG_LED = LED_OFF;
+		LEDFlashCounter--;
+	}
 	_nop() ;
 }
 
