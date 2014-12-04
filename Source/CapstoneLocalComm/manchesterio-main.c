@@ -140,13 +140,15 @@ unsigned int DummyTAR   ;
 #endif
 
 void debugging(void) ; //Just some dummy code to exercise the xmitter.
-int idSeen = 0;
-int idSet = 0;
-int myID = 0;
-int dest = 1;
-int payload = 1;
-int doneIDPhase = 0;
-int breakIDPhase = 0;
+int idSeen = 0;	// The last ID seen, received from other boards.
+int idSet = 0;	// Flag showing whether the ID has been set for this board or not.
+int myID = 0;	// ID of this board.
+int dest = 0;	// ID of the board to send a message to.
+int payload = 0;	// Message body to send.
+int doneIDPhase = 0;	// Flag showing that we are done with the ID phase.
+int breakIDPhase = 0;	// Flag signaling that we should break out of the ID phase.
+int setBufferFlag = 0;	// Flag showing whether we should set the data buffer based on the payload and dest,
+						// should only be done once before sending, even though sending is a multi-step process.
 void main(void) {
 //Be sure to stop watchdog timer first!
 
@@ -163,7 +165,9 @@ void main(void) {
 	int canRead = 0;
 	while(!breakIDPhase) {
 		rcv() ; //Call the receiver
-		if(Rcv1.BitsLeftToGet) canRead = 1;
+		if(Rcv1.BitsLeftToGet) {
+			canRead = 1;
+		}
 		if(canRead) {
 			if(!Rcv1.BitsLeftToGet && Rcv1.LastValidReceived) {
 				canRead = 0;
@@ -190,15 +194,17 @@ void main(void) {
 			_nop() ;
 		}
 #endif
-		_nop();
+		rcv() ;	//Call the receiver
 		if(Rcv1.BitsLeftToGet) {
 			canRead = 1;
 		}
 		if(canRead) {
 			if(!Rcv1.BitsLeftToGet && Rcv1.LastValidReceived) {
 				canRead = 0;
+				_nop();	// Gets the wrong ID in here a lot... Seems like a button bouncing issue?
 				if(myID == ((Rcv1.LastValidReceived >> 8) & 0xFF)) {
 					int flashCount = Rcv1.LastValidReceived >> 16;
+					_nop();	// Rarely gets to here when it should.
 				}
 			}
 		}
@@ -524,10 +530,11 @@ void ihandler(void) {
 		Xmit1.Transmit_Data_Buffer = idSeen;
 		myID = idSeen;
 	}
-	if(doneIDPhase) {
+	if(doneIDPhase && setBufferFlag) {
 		Xmit1.Transmit_Data_Buffer = myID + (dest << 8) + (payload << 16);
-		dest = 1;
-		payload = 1;
+		dest = 0;		// Reset dest to 0 for next message.
+		payload = 0;	// Reset payload to 0 for next message.
+		setBufferFlag = 0;	// Turn off flag, don't set the buffer again.
 	}
 	Xmit(&(Xmit1)) ;
 }
@@ -621,13 +628,17 @@ __interrupt void periodicTimerA0Interrupt(void){
 __interrupt void Button_routine (void) {
 	// Handle the button
 	if(P2IFG & BIT0) {
-		if(send) ReinitXmitter(); // Do we need this
-		send = 1 - send;
+		if(send) {
+			ReinitXmitter(); // Do we need this
+		}
+		send = 1;
+		setBufferFlag = 1;
 		P2IFG &= ~BIT0;
 	}
 	else {
 		dest++;
 		P2IFG &= ~BIT1;
+		_nop();	// This seems to increment dest appropriately, no bouncing here?
 	}
 }
 
@@ -636,6 +647,7 @@ __interrupt void Other_Button_routine (void) {
 	// Handle the button
 	payload++;
 	P1IFG &= ~BIT3;
+	_nop();		// This also doesn't seem to have bouncing issues.
 }
 
 
