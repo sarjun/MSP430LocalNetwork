@@ -144,9 +144,9 @@ int idSeen = 0;	// The last ID seen, received from other boards.
 int idSet = 0;	// Flag showing whether the ID has been set for this board or not.
 int myID = 0;	// ID of this board.
 int dest = 0;	// ID of the board to send a message to.
-int payload = 0;	// Message body to send.
+long payload = 0;	// Message body to send.
 int doneIDPhase = 0;	// Flag showing that we are done with the ID phase.
-int breakIDPhase = 0;	// Flag signaling that we should break out of the ID phase.
+int breakIDPhase = 0;	// Flag signaling that we should break out of the ID setting phase.
 int setBufferFlag = 0;	// Flag showing whether we should set the data buffer based on the payload and dest,
 						// should only be done once before sending, even though sending is a multi-step process.
 void main(void) {
@@ -201,7 +201,7 @@ void main(void) {
 		if(canRead) {
 			if(!Rcv1.BitsLeftToGet && Rcv1.LastValidReceived) {
 				canRead = 0;
-				_nop();	// Gets the wrong ID in here a lot... Seems like a button bouncing issue?
+				_nop();	// Gets the wrong ID in here a lot because of button bouncing issues.
 				if(myID == ((Rcv1.LastValidReceived >> 8) & 0xFF)) {
 					int flashCount = Rcv1.LastValidReceived >> 16;
 					_nop();	// Rarely gets to here when it should.
@@ -638,7 +638,7 @@ __interrupt void Button_routine (void) {
 	else {
 		dest++;
 		P2IFG &= ~BIT1;
-		_nop();	// This seems to increment dest appropriately, no bouncing here?
+		_nop(); // Definitely an issue here with bouncing, not observable with breakpoint (obviously).
 	}
 }
 
@@ -647,7 +647,7 @@ __interrupt void Other_Button_routine (void) {
 	// Handle the button
 	payload++;
 	P1IFG &= ~BIT3;
-	_nop();		// This also doesn't seem to have bouncing issues.
+	_nop();		// Same bouncing issues, not seen with breakpoints.
 }
 
 
