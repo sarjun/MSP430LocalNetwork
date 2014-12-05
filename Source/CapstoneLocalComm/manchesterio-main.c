@@ -565,9 +565,9 @@ void blinkLEDs(int count) {
 	int i=0;
 	for(i=0; i<count; i++) {
 		P2OUT |= BIT5;
-		_delay_cycles(2000000);
+		_delay_cycles(500000);
 		P2OUT &= ~BIT5;
-		_delay_cycles(8000000);
+		_delay_cycles(2000000);
 	}
 }
 
