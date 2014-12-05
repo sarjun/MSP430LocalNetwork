@@ -41,6 +41,13 @@
 #define LED_BIT               0
 #define LED_ON                HIGH
 #define LED_OFF               LOW
+
+#define BOARD_LED1            B8_5(P1OUT)
+#define LED1_PORT_DIR         P1DIR
+#define LED1_BIT              5
+#define BOARD_LED2            B8_5(P1OUT)
+#define LED2_PORT_DIR         P2DIR
+#define LED2_BIT              5
 // Note that the tx_rcv mode should be high to receive.
 
 //Defines for radio receiver
@@ -122,6 +129,9 @@ int GetEvent(void);
 
 //This functions tests a current pulse width and determines if it is a valid width
 PulseWidthStatus TestWidth(unsigned int CurrentPulse);
+
+// Flashes LEDs a fixed number of times.
+void blinkLEDs(int count);
 
 // ************************************************************************************************
 
@@ -206,6 +216,7 @@ void main(void) {
 				_nop();	// Gets the wrong ID in here a lot because of button bouncing issues.
 				if(myID == ((Rcv1.LastValidReceived >> 8) & 0xFF)) {
 					LEDFlashCounter = Rcv1.LastValidReceived >> 16;
+					blinkLEDs(LEDFlashCounter);
 					_nop();	// Rarely gets to here when it should.
 				}
 			}
@@ -550,6 +561,16 @@ void fallingedge(void){
 	InsertEvent(Falling, TA1CCR1) ; //Insert this event into event Queue.
 }
 
+void blinkLEDs(int count) {
+	int i=0;
+	for(i=0; i<count; i++) {
+		P2OUT |= BIT5;
+		_delay_cycles(2000000);
+		P2OUT &= ~BIT5;
+		_delay_cycles(8000000);
+	}
+}
+
 
 //Defines for initializiation of various subsystems
 //Clock System Initialization
@@ -590,6 +611,10 @@ void InitHardware(void) {
 	P1REN |= BIT3;
 	P1OUT |= BIT3;
 	P1IFG &= ~BIT3;
+
+	LED1_PORT_DIR |= LED1_BIT;
+	BOARD_LED1 = LED_OFF;
+	P2DIR |= BIT5;
 
 
 #ifndef DEBUG_RCVR
