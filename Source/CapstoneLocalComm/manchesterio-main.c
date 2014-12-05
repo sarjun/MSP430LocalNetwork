@@ -684,14 +684,6 @@ __interrupt void Other_Button_routine (void) {
 #pragma vector=TIMER1_A0_VECTOR
 __interrupt void timerCaptureRisingInterrupt(void){
 	/* Capture Compare Register 0 ISR Hook Function Name */
-
-	// TODO: Configure this timer properly so it actually interrupts.
-	if (LEDFlashCounter > 0 && DEBUG_LED == LED_OFF) {
-		DEBUG_LED = LED_ON;
-	} else if (LEDFlashCounter > 0) {
-		DEBUG_LED = LED_OFF;
-		LEDFlashCounter--;
-	}
 	_nop() ;
 }
 
